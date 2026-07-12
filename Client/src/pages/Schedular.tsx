@@ -254,7 +254,7 @@ const Schedular = () => {
 
                 </div>
               ))
-            )}
+            )} 
 
 
           </div>
