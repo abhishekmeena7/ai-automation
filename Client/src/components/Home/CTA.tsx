@@ -3,7 +3,7 @@ import { ArrowRightIcon } from "lucide-react";
 
 export default function CTA() {
     return (
-        <section className="py-20" style={{ background: "#ffffff" }}>
+        <section className="home-cta-section py-20" style={{ background: "#ffffff" }}>
             <div className="max-w-6xl mx-auto px-5 sm:px-8">
                 <div
                     className="relative rounded-3xl overflow-hidden p-14 sm:p-20 text-center"

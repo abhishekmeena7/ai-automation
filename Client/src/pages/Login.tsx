@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MailIcon, LockIcon, ArrowRightIcon, User2Icon } from "lucide-react";
+import { useAuth } from "../context/authContext";
+import api from "../api/axios";
+import toast from "react-hot-toast";
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function Login() {
     const [loginState, setLoginState] = useState(true);
@@ -9,18 +13,33 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+const {login,user} = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setTimeout(() => {
-            setLoading(false);
-            navigate("/dashboard");
-        }, 1000);
+        try {
+            const {data} = await api.post(`/api/auth/${loginState ? "login" : "register"}` ,
+                {name,email,password})
+                login(data,data.token)
+                navigate("/dashboard")
+        } catch (error:any) {
+
+            toast.error(error.response?.data?.message || error?.message)
+            
+        }finally{
+            setLoading(false)
+        }
+        
     };
 
+    useEffect(()=>{
+        if(user) navigate('/dashboard')
+    },[user])
+
     return (
-        <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+        <div className="relative min-h-screen bg-slate-100 flex items-center justify-center p-4">
+            <div className="absolute right-4 top-4"><ThemeToggle /></div>
             <div className="relative w-full max-w-md">
                 <div className="bg-white rounded-2xl shadow-sm p-8">
                     <div className="flex flex-col items-center mb-8">

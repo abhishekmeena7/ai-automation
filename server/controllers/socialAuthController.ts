@@ -10,33 +10,26 @@ import { AuthRequest } from "../middleware/authMiddleware.js";
 
 const getOrCreateZernioProfile = async (user: any): Promise<string> => {
     try {
-        const result = await zernio.profile.listProfiles()
-        const data = result.data as any;
-        const profiles: any[] = Array.isArray(data) ? data : data?.profile || data?.data || [];
-        
-        if (profiles.length > 0) {
-            const pid = profiles[0]._id || profiles[0].id
-            
-            await User.findByIdAndUpdate(user._id, { zernioProfileId: pid })
-            return pid;
+          if (user.zernioProfileId) {
+            return user.zernioProfileId;
         }
         
         const createResult = await zernio.profiles.createProfile({
             body: { name: `${user.name || user.email}'s workspace` } as any,
         })
-        
-        const created = (createResult.data as any )?.profile || createResult.data;
+
+        const created = (createResult.data as any)?.profile || createResult.data;
 
         const pid = created?._id || created?.id;
 
         if (!pid) {
             throw new Error("failed to create zernio profile no id returend")
         }
-        
+
         await User.findByIdAndUpdate(user._id, { zernioProfileId: pid });
         return pid;
-        
-    } catch (error:any) {
+
+    } catch (error: any) {
         console.error("getOrCreateZernioProfile Error:", error?.message || error);
         throw error;
     }
@@ -46,15 +39,15 @@ const getOrCreateZernioProfile = async (user: any): Promise<string> => {
 // get /apli/auth/:platform
 
 export const generateAuthUrl = async (req: AuthRequest, res: Response): Promise<void> => {
-    
+
     try {
         const { platform } = req.params
         const profileId = await getOrCreateZernioProfile(req.user);
-        
-        
+
+
         const origin = req.headers.origin;
         const redirectUrl = `${origin}/accounts`
-        
+
         const result = await zernio.connect.getConnectUrl({
             path: { platform: platform as any },
             query: {
@@ -62,21 +55,21 @@ export const generateAuthUrl = async (req: AuthRequest, res: Response): Promise<
                 redirect_url: redirectUrl
             }
         })
-        
+
         const data = result.data as any;
         console.log("getconnecturl response:", JSON.stringify(data, null, 2))
-        
+
         const authUrl = data.authUrl;
         if (!authUrl) {
             throw new Error(`zernio returned no authurl full response: ${JSON.stringify(data)}`)
         }
         res.json({ url: authUrl })
-        
+
     } catch (error: any) {
-        
+
         res.status(500).json({ message: error?.message || "server error" })
     }
-    
+
 }
 
 
@@ -84,15 +77,15 @@ export const generateAuthUrl = async (req: AuthRequest, res: Response): Promise<
 //get /api/auth/sync
 
 export const syncAccount = async (req: AuthRequest, res: Response): Promise<void> => {
-    
+
     try {
         const profileId = await getOrCreateZernioProfile(req.user);
         const result = await zernio.accounts.listAccounts({
             query: { profileId } as any
         })
-        
+
         const data = result.data as any
-        
+
 
         const zernioAccounts: any[] = data?.accounts || (Array.isArray(data) ? data : [])
         const supportedPlatforms = ["twitter", "linkedin", "facebook", "instagram"]

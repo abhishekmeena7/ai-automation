@@ -1,14 +1,10 @@
 import { CalendarDaysIcon, LayoutDashboardIcon, LogOutIcon, UsersIcon, Wand2Icon } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { useAuth } from '../context/authContext';
 
 const Sidebar = ({isOpen,setIsOpen}:{isOpen:boolean,setIsOpen:(val:boolean)=>void}) => {
 
-  const {logout,user} = {
-    logout:()=>{window.location.href = "/"
-
-    },
-    user:{name:"abhishek",email:"abhi@example.com"}
-  }
+  const {logout,user} = useAuth()
   
   const location = useLocation();
 
@@ -26,7 +22,7 @@ const navItems= [
 ]
 
   return (
-<div className={ `fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col h-full transform transition-transform duration-200 ease-in-out md: relative md:translate-x-0  ${ isOpen ? "translate-x-0" : "-translate-x-full"}`}>
+<div className={ `fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col h-full transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0  ${ isOpen ? "translate-x-0" : "-translate-x-full"}`}>
 
 
 {/* logo */}
@@ -68,8 +64,8 @@ return (
 {/* user footer */}
 
 <div className='p-4 border-t border-slate-100'>
-  <div className='flex items-center gap-3 p-2 rounder-xl hover:bg-slate-50 transition-colors'>
-    <div className='text-center size-8 rounded-full bg-linear-to-br  from-red-400 to-pink-400 felx items-center justify-center text-white text-sm font-medium shrink-0'>
+  <div className='flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors'>
+    <div className='flex items-center justify-center text-center size-8 rounded-full bg-linear-to-br from-red-400 to-pink-400 text-white text-sm font-medium shrink-0'>
       {user?.name?.charAt(0).toUpperCase() || "U"}
     </div>
 
@@ -78,7 +74,7 @@ return (
       <div className='text-sm  text-slate-800 truncate'>{user?.email} </div>
     </div>
   </div>
-    <button  onClick={logout} className='mt=1 flex items-center gap-2 px-3 py-2 w-full rounded text-sm text-slate-500 hover:bg-red-50 hover:text-red-500 transition-all duration-150'>
+    <button  onClick={logout} className='mt-1 flex items-center gap-2 px-3 py-2 w-full rounded text-sm text-slate-500 hover:bg-red-50 hover:text-red-500 transition-all duration-150'>
       <LogOutIcon className='size-4'/>
       Sign Out
     </button>
