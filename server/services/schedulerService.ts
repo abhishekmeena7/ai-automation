@@ -3,7 +3,7 @@ import { Post } from "../models/Post.js";
 import { Account } from "../models/Account.js";
 import zernio from "../config/zernio.js";
 import { ActivityLog } from "../models/ActivityLog.js";
-import { platform } from "node:os";
+
 
 export const initScheduler = ()=>{
     cron.schedule("* * * * *",async()=>{
@@ -13,12 +13,11 @@ export const initScheduler = ()=>{
 
         for(const post of postsToPublish){
             try {
-                const accounts = await Account.find({
-                    user:post.user,
-                    platform:{$in:post.platforms},
-                    status:"connected",
-                    zernioAccountId:{$exists:true}
-                })
+                const accounts = await Account.find()
+                    .where("user").equals(post.user)
+                    .where("platform").in(post.platforms)
+                    .where("status").equals("connected")
+                    .where("zernioAccountId").exists(true);
 
                 if(accounts.length === 0){
                     console.log(`no connectred zernio accounts found for post ${post._id}`)

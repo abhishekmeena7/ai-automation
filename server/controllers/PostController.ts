@@ -97,14 +97,17 @@ export const generatePost = async (req: AuthRequest, res: Response): Promise<voi
             try {
                 const client = new InferenceClient(process.env.HUGGING_API_KEY!);
 
-                const image = await client.textToImage({
-                    provider: "fal-ai",
-                    model: "black-forest-labs/FLUX.1-dev",
-                    inputs: imagePrompt,
-                    parameters: {
-                        num_inference_steps: 5,
+                const image = await client.textToImage(
+                    {
+                        provider: "fal-ai",
+                        model: "black-forest-labs/FLUX.1-dev",
+                        inputs: imagePrompt,
+                        parameters: {
+                            num_inference_steps: 5,
+                        },
                     },
-                });
+                    { outputType: "blob" }
+                );
 
                 const arrayBuffer = await image.arrayBuffer();
                 const buffer = Buffer.from(arrayBuffer);
