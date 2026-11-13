@@ -2,15 +2,17 @@
 
 
 import { useEffect, useState } from "react"
-import { dummyGenerationData, PLATFORMS } from "../assets/assets";
+import { PLATFORMS } from "../assets/assets";
 import { ArrowRightIcon, CalendarIcon, ClockIcon, HistoryIcon, Loader2Icon, TimerIcon, Wand2Icon, XIcon } from "lucide-react";
+import api from "../api/axios";
+import toast from "react-hot-toast";
 
 
 const AIComposer = () => {
 
   const [prompt, setPrompt] = useState("")
   const [tone, setTone] = useState("Professional")
-  const [generateImage, setGenerateImage] = useState(true);
+  const [generateImage, setGenerateImage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [generations, setGenerations] = useState<any[]>([]);
 
@@ -25,7 +27,19 @@ const AIComposer = () => {
 
 
   const fetchGenerations = async () => {
-    setGenerations(dummyGenerationData)
+    try {
+      const { data } = await api.get("/api/posts/generations")
+      console.log("GET /generations =>", data);
+      console.log("Is Array?", Array.isArray(data));
+
+      setGenerations(data);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error?.message)
+      console.log(error.response?.data);
+      toast.error(error?.response?.data?.message || error?.message);
+
+    }
+
   }
 
   useEffect(() => {
@@ -33,18 +47,70 @@ const AIComposer = () => {
   }, [])
 
   const handleGenerate = async () => {
+    if (!prompt) {
+      toast.error("plesae enter a prompt")
+      return;
+    }
     setLoading(true)
-    setTimeout(() => {
+
+    try {
+      const { data } = await api.post("/api/posts/generate", {
+        prompt,
+        tone,
+        generateImage,
+      });
+
+      console.log("POST /generate =>", data);
+      console.log("Is Array?", Array.isArray(data));
+
+
+      // naya generated item list ke start me add karo
+      setGenerations((prev: any[]) => [data, ...prev]);
+
+      toast.success("Content generated");
+    } catch (error: any) {
+      toast.error(error?.response?.message || error?.message);
+    } finally {
       setLoading(false)
-    }, 2000);
+    }
   }
 
-const handleSchedule  = async ()=>{
-  setScheduling(true)
-    setTimeout(() => {
+  const handleSchedule = async () => {
+    if (!activeScheduler) return;
+    if (selectedPlatforms.length === 0) {
+      toast.error("select at least one platform")
+      return;
+    }
+    if (!scheduledDate || !scheduledTime) {
+      toast.error("select date and time")
+      return;
+    }
+
+    const scheduledFor = new Date(`${scheduledDate}T${scheduledTime}`).toISOString()
+    setScheduling(true);
+    try {
+      await api.post("/api/posts", {
+        content: activeScheduler.content,
+        mediaUrl: activeScheduler.mediaUrl,
+        mediaType: activeScheduler.mediaType,
+        platforms: selectedPlatforms,
+        scheduledFor,
+        status: "scheduled",
+      })
+
+      toast.success("ai post scheduled")
+      setActiveScheduler(null)
+      setSelectedPlatforms([]);
+      setScheduledDate("")
+      setScheduledTime("")
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "failed to schedule");
+    } finally {
       setScheduling(false)
-    }, 2000);
-}
+    }
+
+
+  }
 
 
   const tones = ["Professional", "Creative", "Funny", "Minimalist", "Excited"];

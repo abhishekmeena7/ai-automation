@@ -1,8 +1,11 @@
 import { Link } from "react-router-dom";
 import { ArrowRightIcon } from "lucide-react";
+import { useAuth } from "../../context/authContext";
+import ThemeToggle from "../ThemeToggle";
 
 export default function Navbar() {
-    const { user } = { user: false };
+    const { user } = useAuth();
+    
 
     return (
         <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-100">
@@ -23,20 +26,23 @@ export default function Navbar() {
                     </a>
                 </div>
 
-                {user ? (
-                    <Link to="/dashboard" className="flex items-center gap-1.5 text-sm font-medium bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full shadow-sm hover:shadow-red-200 hover:shadow-md">
-                        Go to Dashboard <ArrowRightIcon className="size-3.5" />
+                <div className="flex items-center gap-2 sm:gap-3">
+                    <ThemeToggle />
+                    {user ? (
+                    <Link to="/dashboard" className="flex items-center gap-1.5 text-sm font-medium bg-red-500 hover:bg-red-600 text-white px-3 sm:px-4 py-2 rounded-full shadow-sm hover:shadow-red-200 hover:shadow-md">
+                        <span className="hidden sm:inline">Go to Dashboard</span><span className="sm:hidden">Dashboard</span> <ArrowRightIcon className="size-3.5" />
                     </Link>
-                ) : (
-                    <div className="flex items-center gap-3">
-                        <Link to="/login" className="text-sm text-slate-600 hover:text-slate-900 hidden sm:block">
-                            Sign In
-                        </Link>
-                        <Link to="/login" className="flex items-center gap-1.5 text-sm bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full shadow-sm hover:shadow-red-200 hover:shadow-md">
-                            Get Started <ArrowRightIcon className="size-3.5" />
-                        </Link>
-                    </div>
-                )}
+                    ) : (
+                        <>
+                            <Link to="/login" className="text-sm text-slate-600 hover:text-slate-900 hidden sm:block">
+                                Sign In
+                            </Link>
+                            <Link to="/login" className="flex items-center gap-1.5 text-sm bg-red-500 hover:bg-red-600 text-white px-3 sm:px-4 py-2 rounded-full shadow-sm hover:shadow-red-200 hover:shadow-md">
+                                Get Started <ArrowRightIcon className="size-3.5" />
+                            </Link>
+                        </>
+                    )}
+                </div>
             </div>
         </nav>
     );
